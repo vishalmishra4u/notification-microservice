@@ -1,5 +1,6 @@
 require("dotenv").config();
 const sgMail = require("@sendgrid/mail");
+const logger = require("../utils/logger");
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -13,7 +14,7 @@ module.exports = async function sendNotification({ userId, channel, message }) {
     };
 
     await sgMail.send(msg);
-    console.log(`[EMAIL SENT] to ${msg.to}: ${msg.text}`);
+    logger.info(`[EMAIL SENT] to ${msg.to}: ${msg.text}`);
   }
 
   // Future: Add SMS, Push, WhatsApp here
