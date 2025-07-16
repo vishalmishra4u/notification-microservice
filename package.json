@@ -10,11 +10,18 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
     "dotenv": "^17.0.1",
     "ioredis": "^5.6.1",
-    "kafkajs": "^2.2.4"
+    "kafkajs": "^2.2.4",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "eslint": "^9.31.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.1",
+    "globals": "^16.3.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2"
   }
 }
