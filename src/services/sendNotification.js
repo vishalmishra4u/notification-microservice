@@ -1,24 +1,31 @@
 require("dotenv").config();
-const sgMail = require("@sendgrid/mail");
+const { MailtrapClient } = require("mailtrap");
 const logger = require("../utils/logger");
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const mailtrapClient = new MailtrapClient({
+  token: process.env.MAILTRAP_API_KEY,
+});
 
-module.exports = async function sendNotification({ userId, channel, message }) {
-  if (channel === "email") {
-    const msg = {
-      to: "testuser@example.com", // Replace with real user email
-      from: process.env.FROM_EMAIL,
-      subject: "Notification",
-      text: message,
-    };
+module.exports = async function sendNotification(data) {
+  const sender = {
+    email: process.env.FROM_EMAIL,
+    name: "Mailtrap Test",
+  };
+  const recipients = [
+    {
+      email: data.email,
+    },
+  ];
 
-    await sgMail.send(msg);
-    logger.info(`[EMAIL SENT] to ${msg.to}: ${msg.text}`);
-  }
+  mailtrapClient
+    .send({
+      from: sender,
+      to: recipients,
+      subject: "Verification mail from Esports Service",
+      text: `Click to verify: ${data.verificationLink}`,
+    })
+    .then(console.log, console.error);
+  logger.info(`[EMAIL SENT] to ${recipients[0].email}: ${message}`);
 
   // Future: Add SMS, Push, WhatsApp here
-  else {
-    throw new Error(`Unsupported channel: ${channel}`);
-  }
 };

@@ -1,10 +1,17 @@
-const runConsumer = require('./consumers/notificationConsumer');
+require("dotenv").config();
+const runConsumer = require("./consumers/notificationConsumer");
 
-(async () => {
+async function start() {
   try {
+    console.log("Starting Notification Service...");
+
     await runConsumer();
-    console.log('Notification service is running...');
-  } catch (err) {
-    console.error('Error in notification service:', err);
+
+    console.log("Notification Service is running...");
+  } catch (error) {
+    console.error("Failed to start notification service:", error);
+    process.exit(1);
   }
-})();
+}
+
+start();
