@@ -1,38 +1,40 @@
 const kafka = require("../config/kafka");
-const { KAFKA_TOPICS } = require("../config/topics");
-// const redis = require("../config/redis");
-const sendNotification = require("../services/sendNotification");
+const handlers = {
+  "user.registered": require("../handlers/userRegistered.handler"),
+  "user.verified": require("../handlers/userVerified.handler"),
+};
+
 require("dotenv").config();
 
 const producer = kafka.producer();
 const consumer = kafka.consumer({ groupId: "notification-group" });
 
 const runConsumer = async () => {
-  console.log(
-    "Connecting to Kafka... coming here -----------------------------"
-  );
   await producer.connect();
   await consumer.connect();
 
-  await consumer.subscribe({
-    topic: KAFKA_TOPICS.USER_REGISTERED,
-    fromBeginning: true, // set false later
-  });
+  const topics = ["user.registered", "user.verified"];
+
+  for (const topic of topics) {
+    await consumer.subscribe({ topic, fromBeginning: false });
+  }
 
   await consumer.run({
-    eachMessage: async ({ message }) => {
-      console.log(
-        "Received message #######################:",
-        message.value.toString()
-      );
+    eachMessage: async ({ topic, message }) => {
       const data = JSON.parse(message.value.toString());
-      // const redisKey = `notified:${data.userId}:${data.channel}`;
-
-      // Deduplication
-      // if (await redis.get(redisKey)) return;
-
       try {
-        await sendNotification(data);
+        console.log(`📩 Received event: ${topic}`);
+
+        const handler = handlers[topic];
+
+        if (!handler) {
+          console.warn(`⚠️ No handler found for topic: ${topic}`);
+          return;
+        }
+
+        await handler(data);
+
+        console.log(`✅ Event processed: ${topic}`);
         // await redis.set(redisKey, "1", "EX", 60); // Cache for 1 min
       } catch (err) {
         console.error("Notification failed:", err.message);
